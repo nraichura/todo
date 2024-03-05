@@ -17,13 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ItemController {
 
-    private final ItemRepository itemRepository;
     private final ItemService itemService;
 
     @PostMapping("/items")
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto saveItem(@RequestBody @Nonnull @Valid CreateItemRequestDto item){
-        return itemRepository.save(item.toItemEntity()).toItemDto();
+        return itemService.save(item.toItemEntity()).toItemDto();
     }
 
     @PatchMapping("/items/{itemId}")

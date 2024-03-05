@@ -23,4 +23,8 @@ public class ItemService {
                     return existingItem.toItemDto();
                 });
     }
+
+    public Item save(Item item) {
+        return itemRepository.save(item);
+    }
 }

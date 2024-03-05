@@ -8,6 +8,7 @@ import com.simplesystem.todo.entity.Item;
 import com.simplesystem.todo.entity.ItemStatus;
 import com.simplesystem.todo.exception.GenericErrorModel;
 import com.simplesystem.todo.repository.ItemRepository;
+import com.simplesystem.todo.service.ItemService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class ItemControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private ItemRepository itemRepository;
+    private ItemService itemService;
 
     @Test
     void addItem_ShouldAddItemSuccessfully() throws Exception {
@@ -44,7 +45,7 @@ public class ItemControllerTest {
         Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
         Item item = new Item(1L, "open bank account", ItemStatus.NOT_DONE, Instant.now(), dueAt, null);
         ItemDto itemDto = item.toItemDto();
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
+        when(itemService.save(any(Item.class))).thenReturn(item);
 
         // Act
         MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
