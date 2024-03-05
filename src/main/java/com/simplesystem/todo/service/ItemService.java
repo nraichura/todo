@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class ItemService {
@@ -37,6 +39,11 @@ public class ItemService {
         return transactionHandler.runInTransaction(() -> {
             Item existingItem = getItem(itemId);
             existingItem.setStatus(status);
+            switch (status){
+                case DONE -> existingItem.setMarkedDoneAt(Instant.now());
+                case NOT_DONE -> existingItem.setMarkedDoneAt(null);
+                case PAST_DUE -> throw new UnsupportedOperationException("Past Due operation is not supported at the moment");
+            }
             return existingItem.toItemDto();
         });
     }

@@ -23,8 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ItemApisTest {
@@ -40,12 +39,10 @@ public class ItemApisTest {
     @Test
     public void updateDescription_ShouldRunSuccessfully() throws UnsupportedEncodingException {
         // Prepare - create an item
-        ResponseEntity<ItemDto> createResponse = template.postForEntity(BASE_URL + CREATE_ITEM_ENDPOINT_URL, new CreateItemRequestDto("oldDesc", Instant.now().plus(1, ChronoUnit.HOURS)), ItemDto.class);
-        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
-        assertNotNull(createResponse.getBody());
+        ItemDto newItem = createItem();
 
         // Extract the created item's ID
-        long itemId = createResponse.getBody().getId();
+        long itemId = newItem.getId();
 
         // Act - update the description of the created item
         ResponseEntity<ItemDto> response = template.exchange(BASE_URL + DESCRIPTION_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeDescriptionRequestDto("newDesc")), ItemDto.class, getEncode(itemId));
@@ -76,13 +73,10 @@ public class ItemApisTest {
     @Test
     public void updateStatus_ShouldRunSuccessfully() throws UnsupportedEncodingException {
         // Prepare - create an item
-        ResponseEntity<ItemDto> createResponse = template.postForEntity(BASE_URL + CREATE_ITEM_ENDPOINT_URL, new CreateItemRequestDto("desc", Instant.now().plus(1, ChronoUnit.HOURS)), ItemDto.class);
-        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
-        assertNotNull(createResponse.getBody());
-        assertEquals(createResponse.getBody().getStatus(), ItemStatus.NOT_DONE);
+        ItemDto newItem = createItem();
 
         // Extract the created item's ID
-        long itemId = createResponse.getBody().getId();
+        long itemId = newItem.getId();
 
         // Act - update the description of the created item
 
@@ -90,7 +84,41 @@ public class ItemApisTest {
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(ItemStatus.DONE, Objects.requireNonNull(response.getBody()).getStatus());
+        ItemDto item = Objects.requireNonNull(response.getBody());
+        assertEquals(ItemStatus.DONE, item.getStatus());
+        assertNotNull(item.getMarkedDoneAt());
+    }
+
+    @Test
+    public void updateStatus_ShouldNullifyMarkedDoneAt_WhenStatusUpdateFromDoneToNotDone() throws UnsupportedEncodingException {
+        // Prepare - create an item
+        ItemDto newItem = createItem();
+        // Extract the created item's ID
+        long itemId = newItem.getId();
+        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.DONE)), ItemDto.class, getEncode(itemId));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ItemDto item = Objects.requireNonNull(response.getBody());
+        assertEquals(ItemStatus.DONE, item.getStatus());
+        assertNotNull(item.getMarkedDoneAt());
+
+        // Act - update the description of the created item
+        ResponseEntity<ItemDto> response2 = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.NOT_DONE)), ItemDto.class, getEncode(itemId));
+
+        // Assert
+        assertEquals(HttpStatus.OK, response2.getStatusCode());
+        ItemDto sameModifiedItem = Objects.requireNonNull(response2.getBody());
+        assertEquals(ItemStatus.NOT_DONE, sameModifiedItem.getStatus());
+        assertNull(sameModifiedItem.getMarkedDoneAt());
+    }
+
+    private ItemDto createItem() {
+        ResponseEntity<ItemDto> createResponse = template.postForEntity(BASE_URL + CREATE_ITEM_ENDPOINT_URL, new CreateItemRequestDto("desc", Instant.now().plus(1, ChronoUnit.HOURS)), ItemDto.class);
+        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+        ItemDto newItem = createResponse.getBody();
+        assertNotNull(newItem);
+        assertEquals(newItem.getStatus(), ItemStatus.NOT_DONE);
+        assertNull(newItem.getMarkedDoneAt());
+        return newItem;
     }
 
     private String getEncode(long itemId) throws UnsupportedEncodingException {
