@@ -21,9 +21,6 @@ public class CreateItemRequestDto {
     private Instant dueAt;
 
     public Item toItemEntity() {
-        return Item.builder()
-                .description(this.description)
-                .dueAt(this.dueAt)
-                .build();
+        return new Item(this.description, this.dueAt);
     }
 }

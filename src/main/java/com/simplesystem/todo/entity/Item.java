@@ -3,10 +3,7 @@ package com.simplesystem.todo.entity;
 
 import com.simplesystem.todo.dto.ItemDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 
@@ -15,6 +12,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +37,7 @@ public class Item {
 
     public ItemDto toItemDto() {
         return ItemDto.builder()
+                .id(this.id)
                 .description(this.description)
                 .status(this.status)
                 .createdAt(this.createdAt)

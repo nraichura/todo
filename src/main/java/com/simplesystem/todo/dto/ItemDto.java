@@ -1,6 +1,7 @@
 package com.simplesystem.todo.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.simplesystem.todo.entity.Item;
 import com.simplesystem.todo.entity.ItemStatus;
@@ -18,6 +19,8 @@ import java.time.Instant;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class ItemDto {
+    @Nonnull
+    private Long id;
     @Nonnull
     private String description;
     @Nonnull
