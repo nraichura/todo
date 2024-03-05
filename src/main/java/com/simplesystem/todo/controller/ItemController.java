@@ -4,6 +4,7 @@ import com.simplesystem.todo.dto.ChangeDescriptionRequestDto;
 import com.simplesystem.todo.dto.ChangeStatusRequestDto;
 import com.simplesystem.todo.dto.CreateItemRequestDto;
 import com.simplesystem.todo.dto.ItemDto;
+import com.simplesystem.todo.entity.Item;
 import com.simplesystem.todo.entity.ItemStatus;
 import com.simplesystem.todo.service.ItemService;
 import jakarta.annotation.Nonnull;
@@ -30,19 +31,26 @@ public class ItemController {
 
     @PatchMapping("/items/{itemId}/description")
     @ResponseStatus(HttpStatus.OK)
-    public ItemDto changeDescription(@RequestBody @Nonnull @Valid ChangeDescriptionRequestDto item, @PathVariable("itemId") Long itemId){
-        return itemService.changeDescription(itemId, item.description());
+    public ItemDto changeDescription(@RequestBody @Nonnull @Valid ChangeDescriptionRequestDto item, @Nonnull @PathVariable("itemId") Long itemId){
+        return itemService.changeDescription(itemId, item.description()).toItemDto();
     }
 
     @PatchMapping("/items/{itemId}/status")
     @ResponseStatus(HttpStatus.OK)
-    public ItemDto changeStatus(@RequestBody @Nonnull ChangeStatusRequestDto item, @PathVariable("itemId") Long itemId){
-        return itemService.changeStatus(itemId, item.status());
+    public ItemDto changeStatus(@RequestBody @Nonnull ChangeStatusRequestDto item, @Nonnull @PathVariable("itemId") Long itemId){
+        return itemService.changeStatus(itemId, item.status()).toItemDto();
     }
 
     @GetMapping("/items")
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemDto> getItems(@RequestParam(name = "status", required = false) @Nullable ItemStatus status){
-        return itemService.getItems(status);
+    public List<ItemDto> getItems(@RequestParam(name = "statusToExclude", required = false) @Nullable ItemStatus statusToExclude){
+        return itemService.getItems(statusToExclude).stream()
+                .map(Item::toItemDto).toList();
+    }
+
+    @GetMapping("/items/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDto getItem(@Nonnull @PathVariable("itemId") Long itemId){
+        return itemService.getItem(itemId).toItemDto();
     }
 }

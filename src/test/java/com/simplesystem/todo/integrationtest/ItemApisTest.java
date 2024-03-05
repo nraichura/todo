@@ -42,6 +42,7 @@ public class ItemApisTest {
     private static final String DESCRIPTION_UPDATE_ENDPOINT_URL = "/items/{itemId}/description";
     private static final String CREATE_ITEM_ENDPOINT_URL = "/items";
     private static final String GET_ITEMS_ENDPOINT_URL = "/items";
+    private static final String GET_ITEM_ENDPOINT_URL = "/items/{itemId}";
 
     @AfterEach
     public void deleteAllData(){
@@ -49,7 +50,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void createItem_Should_WhenTheItemIsCreatedWithSameDescriptionAgain() {
+    public void createItem_ShouldGiveInternalServerError_WhenTheItemIsCreatedWithSameDescriptionAgain() {
         // Prepare - create an item
         createItem("desc");
 
@@ -166,13 +167,30 @@ public class ItemApisTest {
         // Act - update the description of the created item
         ParameterizedTypeReference<List<ItemDto>> responseType = new ParameterizedTypeReference<>() {
         };
-        ResponseEntity<List<ItemDto>> getAllResp = template.exchange(String.format(BASE_URL + GET_ITEMS_ENDPOINT_URL + "?status=%s", ItemStatus.NOT_DONE), HttpMethod.GET, null, responseType);
+        ResponseEntity<List<ItemDto>> getAllResp = template.exchange(String.format(BASE_URL + GET_ITEMS_ENDPOINT_URL + "?statusToExclude=%s", ItemStatus.NOT_DONE), HttpMethod.GET, null, responseType);
 
         // Assert
         assertEquals(HttpStatus.OK, getAllResp.getStatusCode());
         List<ItemDto> items = Objects.requireNonNull(getAllResp.getBody());
-        assertEquals(1, items.size());
-        assertEquals(List.of(newItem3), items);
+        assertEquals(2, items.size());
+        assertEquals(List.of(Objects.requireNonNull(response.getBody()), Objects.requireNonNull(response2.getBody())), items);
+    }
+
+    @Test
+    public void getItem_ShouldRunSuccessfully() throws UnsupportedEncodingException {
+        // Prepare - create an item
+        ItemDto newItem = createItem("desc");
+        Long itemId = newItem.getId();
+
+        // Act - update the description of the created item
+        ParameterizedTypeReference<ItemDto> responseType = new ParameterizedTypeReference<>() {
+        };
+        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + GET_ITEM_ENDPOINT_URL, HttpMethod.GET, null, responseType, urlEncode(String.valueOf(itemId)));
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ItemDto item = Objects.requireNonNull(response.getBody());
+        assertEquals(newItem, item);
     }
 
     private ItemDto createItem(String desc) {
