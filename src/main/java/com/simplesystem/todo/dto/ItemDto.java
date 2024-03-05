@@ -18,7 +18,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class ItemDto {
-    @Nonnull @NotBlank
+    @Nonnull @NotBlank(message = "Description cannot be blank")
     private String description;
     @Nonnull
     private ItemStatus status;

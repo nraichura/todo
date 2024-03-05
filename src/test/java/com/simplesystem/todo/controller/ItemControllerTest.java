@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simplesystem.todo.dto.ItemDto;
 import com.simplesystem.todo.entity.Item;
 import com.simplesystem.todo.entity.ItemStatus;
+import com.simplesystem.todo.exception.GenericErrorModel;
 import com.simplesystem.todo.repository.ItemRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,9 +63,7 @@ public class ItemControllerTest {
     void addItem_ShouldThrowErrorWhenDescriptionIsKeptNullOrBlank() throws Exception {
         // Prepare
         Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
-        Item item = new Item(1L, "", ItemStatus.NOT_DONE, Instant.now(), dueAt, null);
-        ItemDto itemDto = item.toItemDto();
-//        when(itemRepository.save(any(Item.class))).thenReturn(item);
+        GenericErrorModel errorModel = new GenericErrorModel(List.of(new GenericErrorModel.GenericErrorModelBody(List.of("Description cannot be blank"))));
 
         // Act
         MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
@@ -75,7 +75,7 @@ public class ItemControllerTest {
 
         // Assert
         assertEquals(400, mvcResult.getResponse().getStatus());
-        assertEquals(mvcResult.getResponse().getErrorMessage(), "Invalid request content.");
+        assertEquals(errorModel, fromJsonString(mvcResult.getResponse().getContentAsString(), GenericErrorModel.class));
     }
 
     private <T> T fromJsonString(String content, Class<T> tClass){
