@@ -57,7 +57,7 @@ public class ItemApisTest {
         long itemId = newItem.getId();
 
         // Act - update the description of the created item
-        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + DESCRIPTION_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeDescriptionRequestDto("newDesc")), ItemDto.class, getEncode(itemId));
+        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + DESCRIPTION_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeDescriptionRequestDto("newDesc")), ItemDto.class, urlEncode(String.valueOf(itemId)));
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -71,7 +71,7 @@ public class ItemApisTest {
         List<String> expectedResponse = List.of(String.format("Item with id %s not found", itemId));
 
         // Act - update the description of the created item
-        ResponseEntity<GenericErrorModel> response = template.exchange(BASE_URL + DESCRIPTION_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeDescriptionRequestDto("newDesc")), GenericErrorModel.class, getEncode(itemId));
+        ResponseEntity<GenericErrorModel> response = template.exchange(BASE_URL + DESCRIPTION_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeDescriptionRequestDto("newDesc")), GenericErrorModel.class, urlEncode(String.valueOf(itemId)));
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -92,7 +92,7 @@ public class ItemApisTest {
 
         // Act - update the description of the created item
 
-        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.DONE)), ItemDto.class, getEncode(itemId));
+        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.DONE)), ItemDto.class, urlEncode(String.valueOf(itemId)));
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -107,14 +107,14 @@ public class ItemApisTest {
         ItemDto newItem = createItem("desc");
         // Extract the created item's ID
         long itemId = newItem.getId();
-        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.DONE)), ItemDto.class, getEncode(itemId));
+        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.DONE)), ItemDto.class, urlEncode(String.valueOf(itemId)));
         assertEquals(HttpStatus.OK, response.getStatusCode());
         ItemDto item = Objects.requireNonNull(response.getBody());
         assertEquals(ItemStatus.DONE, item.getStatus());
         assertNotNull(item.getMarkedDoneAt());
 
         // Act - update the description of the created item
-        ResponseEntity<ItemDto> response2 = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.NOT_DONE)), ItemDto.class, getEncode(itemId));
+        ResponseEntity<ItemDto> response2 = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.NOT_DONE)), ItemDto.class, urlEncode(String.valueOf(itemId)));
 
         // Assert
         assertEquals(HttpStatus.OK, response2.getStatusCode());
@@ -142,6 +142,27 @@ public class ItemApisTest {
         assertEquals(List.of(newItem, newItem2, newItem3), items);
     }
 
+    @Test
+    public void getItems_ShouldReturnSpecificItems_WhenFilterCriteriaIsProvided() throws UnsupportedEncodingException {
+        // Prepare - create an item
+        ItemDto newItem = createItem("desc");
+        ItemDto newItem2 = createItem("desc2");
+        ItemDto newItem3 = createItem("desc3");
+        ResponseEntity<ItemDto> response = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.DONE)), ItemDto.class, urlEncode(String.valueOf(newItem.getId())));
+        ResponseEntity<ItemDto> response2 = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.DONE)), ItemDto.class, urlEncode(String.valueOf(newItem2.getId())));
+
+        // Act - update the description of the created item
+        ParameterizedTypeReference<List<ItemDto>> responseType = new ParameterizedTypeReference<>() {
+        };
+        ResponseEntity<List<ItemDto>> getAllResp = template.exchange(String.format(BASE_URL + GET_ITEMS_ENDPOINT_URL + "?status=%s", ItemStatus.NOT_DONE), HttpMethod.GET, null, responseType);
+
+        // Assert
+        assertEquals(HttpStatus.OK, getAllResp.getStatusCode());
+        List<ItemDto> items = Objects.requireNonNull(getAllResp.getBody());
+        assertEquals(1, items.size());
+        assertEquals(List.of(newItem3), items);
+    }
+
     private ItemDto createItem(String desc) {
         ResponseEntity<ItemDto> createResponse = template.postForEntity(BASE_URL + CREATE_ITEM_ENDPOINT_URL, new CreateItemRequestDto(desc, Instant.now().plus(1, ChronoUnit.HOURS)), ItemDto.class);
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
@@ -152,7 +173,7 @@ public class ItemApisTest {
         return newItem;
     }
 
-    private String getEncode(long itemId) throws UnsupportedEncodingException {
-        return URLEncoder.encode(String.valueOf(itemId), StandardCharsets.UTF_8.toString());
+    private String urlEncode(String itemId) throws UnsupportedEncodingException {
+        return URLEncoder.encode(itemId, StandardCharsets.UTF_8.toString());
     }
 }

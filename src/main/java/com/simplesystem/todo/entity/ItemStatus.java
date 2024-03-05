@@ -10,12 +10,7 @@ public enum ItemStatus {
     @JsonValue
     private final String description;
 
-    ItemStatus(final String description) {
+    ItemStatus(String description) {
         this.description = description;
-    }
-
-    @Override
-    public String toString() {
-        return description;
     }
 }
