@@ -6,10 +6,13 @@ import com.simplesystem.todo.dto.CreateItemRequestDto;
 import com.simplesystem.todo.dto.ItemDto;
 import com.simplesystem.todo.entity.ItemStatus;
 import com.simplesystem.todo.exception.GenericErrorModel;
+import com.simplesystem.todo.repository.ItemRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -31,15 +34,24 @@ public class ItemApisTest {
     @Autowired
     private TestRestTemplate template;
 
+    @Autowired
+    private ItemRepository itemRepository;
+
     private static final String BASE_URL = "/api/v1";
     private static final String STATUS_UPDATE_ENDPOINT_URL = "/items/{itemId}/status";
     private static final String DESCRIPTION_UPDATE_ENDPOINT_URL = "/items/{itemId}/description";
     private static final String CREATE_ITEM_ENDPOINT_URL = "/items";
+    private static final String GET_ITEMS_ENDPOINT_URL = "/items";
+
+    @AfterEach
+    public void deleteAllData(){
+        itemRepository.deleteAll();
+    }
 
     @Test
     public void updateDescription_ShouldRunSuccessfully() throws UnsupportedEncodingException {
         // Prepare - create an item
-        ItemDto newItem = createItem();
+        ItemDto newItem = createItem("desc");
 
         // Extract the created item's ID
         long itemId = newItem.getId();
@@ -73,7 +85,7 @@ public class ItemApisTest {
     @Test
     public void updateStatus_ShouldRunSuccessfully() throws UnsupportedEncodingException {
         // Prepare - create an item
-        ItemDto newItem = createItem();
+        ItemDto newItem = createItem("desc");
 
         // Extract the created item's ID
         long itemId = newItem.getId();
@@ -92,7 +104,7 @@ public class ItemApisTest {
     @Test
     public void updateStatus_ShouldNullifyMarkedDoneAt_WhenStatusUpdateFromDoneToNotDone() throws UnsupportedEncodingException {
         // Prepare - create an item
-        ItemDto newItem = createItem();
+        ItemDto newItem = createItem("desc");
         // Extract the created item's ID
         long itemId = newItem.getId();
         ResponseEntity<ItemDto> response = template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(ItemStatus.DONE)), ItemDto.class, getEncode(itemId));
@@ -111,8 +123,27 @@ public class ItemApisTest {
         assertNull(sameModifiedItem.getMarkedDoneAt());
     }
 
-    private ItemDto createItem() {
-        ResponseEntity<ItemDto> createResponse = template.postForEntity(BASE_URL + CREATE_ITEM_ENDPOINT_URL, new CreateItemRequestDto("desc", Instant.now().plus(1, ChronoUnit.HOURS)), ItemDto.class);
+    @Test
+    public void getItems_ShouldRunSuccessfully(){
+        // Prepare - create an item
+        ItemDto newItem = createItem("desc");
+        ItemDto newItem2 = createItem("desc2");
+        ItemDto newItem3 = createItem("desc3");
+
+        // Act - update the description of the created item
+        ParameterizedTypeReference<List<ItemDto>> responseType = new ParameterizedTypeReference<>() {
+        };
+        ResponseEntity<List<ItemDto>> response = template.exchange(BASE_URL + GET_ITEMS_ENDPOINT_URL, HttpMethod.GET, null, responseType);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<ItemDto> items = Objects.requireNonNull(response.getBody());
+        assertEquals(3, items.size());
+        assertEquals(List.of(newItem, newItem2, newItem3), items);
+    }
+
+    private ItemDto createItem(String desc) {
+        ResponseEntity<ItemDto> createResponse = template.postForEntity(BASE_URL + CREATE_ITEM_ENDPOINT_URL, new CreateItemRequestDto(desc, Instant.now().plus(1, ChronoUnit.HOURS)), ItemDto.class);
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
         ItemDto newItem = createResponse.getBody();
         assertNotNull(newItem);

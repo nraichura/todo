@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,5 +48,19 @@ public class ItemService {
             }
             return existingItem.toItemDto();
         });
+    }
+
+    public List<ItemDto> getItems(ItemStatus status) {
+        Optional<ItemStatus> statusOptional = Optional.ofNullable(status);
+        if (statusOptional.isPresent()){
+            return itemRepository.findByStatus(statusOptional.get())
+                    .stream()
+                    .map(Item::toItemDto)
+                    .toList();
+        }
+        return itemRepository.findAll()
+                .stream()
+                .map(Item::toItemDto)
+                .toList();
     }
 }
