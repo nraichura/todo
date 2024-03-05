@@ -1,13 +1,12 @@
 package com.simplesystem.todo.controller;
 
 import com.simplesystem.todo.dto.ChangeDescriptionRequestDto;
+import com.simplesystem.todo.dto.ChangeStatusRequestDto;
 import com.simplesystem.todo.dto.CreateItemRequestDto;
 import com.simplesystem.todo.dto.ItemDto;
-import com.simplesystem.todo.repository.ItemRepository;
 import com.simplesystem.todo.service.ItemService;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +24,15 @@ public class ItemController {
         return itemService.save(item.toItemEntity()).toItemDto();
     }
 
-    @PatchMapping("/items/{itemId}")
+    @PatchMapping("/items/{itemId}/description")
     @ResponseStatus(HttpStatus.OK)
     public ItemDto changeDescription(@RequestBody @Nonnull @Valid ChangeDescriptionRequestDto item, @PathVariable("itemId") Long itemId){
         return itemService.changeDescription(itemId, item.description());
+    }
+
+    @PatchMapping("/items/{itemId}/status")
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDto changeStatus(@RequestBody @Nonnull ChangeStatusRequestDto item, @PathVariable("itemId") Long itemId){
+        return itemService.changeStatus(itemId, item.status());
     }
 }

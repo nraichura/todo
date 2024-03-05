@@ -2,6 +2,7 @@ package com.simplesystem.todo.service;
 
 import com.simplesystem.todo.dto.ItemDto;
 import com.simplesystem.todo.entity.Item;
+import com.simplesystem.todo.entity.ItemStatus;
 import com.simplesystem.todo.exception.HttpException;
 import com.simplesystem.todo.repository.ItemRepository;
 import com.simplesystem.todo.utility.TransactionHandler;
@@ -18,13 +19,25 @@ public class ItemService {
 
     public ItemDto changeDescription(final Long itemId, final String newDescription){
         return transactionHandler.runInTransaction(() -> {
-                    Item existingItem = itemRepository.findById(itemId).orElseThrow(() -> new HttpException(HttpStatus.NOT_FOUND, String.format("Item with id %s not found", itemId)));
+                    Item existingItem = getItem(itemId);
                     existingItem.setDescription(newDescription);
                     return existingItem.toItemDto();
                 });
     }
 
+    private Item getItem(Long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() -> new HttpException(HttpStatus.NOT_FOUND, String.format("Item with id %s not found", itemId)));
+    }
+
     public Item save(Item item) {
         return itemRepository.save(item);
+    }
+
+    public ItemDto changeStatus(final Long itemId, final ItemStatus status) {
+        return transactionHandler.runInTransaction(() -> {
+            Item existingItem = getItem(itemId);
+            existingItem.setStatus(status);
+            return existingItem.toItemDto();
+        });
     }
 }
