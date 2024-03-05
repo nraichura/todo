@@ -1,5 +1,6 @@
 package com.simplesystem.todo.controller;
 
+import com.simplesystem.todo.dto.CreateItemRequestDto;
 import com.simplesystem.todo.dto.ItemDto;
 import com.simplesystem.todo.repository.ItemRepository;
 import jakarta.annotation.Nonnull;
@@ -20,7 +21,7 @@ public class ItemController {
 
     @PostMapping("/items")
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto saveItem(@RequestBody @Nonnull @Valid ItemDto item){
+    public ItemDto saveItem(@RequestBody @Nonnull @Valid CreateItemRequestDto item){
         return itemRepository.save(item.toItemEntity()).toItemDto();
     }
 }

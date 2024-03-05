@@ -30,6 +30,13 @@ public class Item {
     @Column(name = "MARKED_DONE_AT")
     private Instant markedDoneAt;
 
+    public Item(String description, Instant dueAt) {
+        this.description = description;
+        this.dueAt = dueAt;
+        this.createdAt = Instant.now();
+        this.status = ItemStatus.NOT_DONE;
+    }
+
     public ItemDto toItemDto() {
         return ItemDto.builder()
                 .description(this.description)

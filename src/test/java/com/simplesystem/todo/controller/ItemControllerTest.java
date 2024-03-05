@@ -2,6 +2,7 @@ package com.simplesystem.todo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.simplesystem.todo.dto.CreateItemRequestDto;
 import com.simplesystem.todo.dto.ItemDto;
 import com.simplesystem.todo.entity.Item;
 import com.simplesystem.todo.entity.ItemStatus;
@@ -47,7 +48,7 @@ public class ItemControllerTest {
 
         // Act
         MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
-                        .content(asJsonString(new ItemDto("open bank account", dueAt)))
+                        .content(asJsonString(new CreateItemRequestDto("open bank account", dueAt)))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -67,7 +68,7 @@ public class ItemControllerTest {
 
         // Act
         MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
-                        .content(asJsonString(new ItemDto("", dueAt)))
+                        .content(asJsonString(new CreateItemRequestDto("", dueAt)))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())

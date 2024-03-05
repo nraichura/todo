@@ -1,31 +1,29 @@
 package com.simplesystem.todo.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.simplesystem.todo.entity.Item;
 import com.simplesystem.todo.entity.ItemStatus;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.Instant;
-
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class ItemDto {
+public class CreateItemRequestDto {
     @Nonnull
+    @NotBlank(message = "Description cannot be blank")
     private String description;
     @Nonnull
-    private ItemStatus status;
-    @Nonnull
-    private Instant createdAt;
-    @Nonnull
     private Instant dueAt;
-    @Nullable
-    private Instant markedDoneAt;
+
+    public Item toItemEntity() {
+        return Item.builder()
+                .description(this.description)
+                .dueAt(this.dueAt)
+                .build();
+    }
 }
