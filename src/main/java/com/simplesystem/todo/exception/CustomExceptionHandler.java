@@ -17,7 +17,17 @@ public class CustomExceptionHandler {
     public ResponseEntity<GenericErrorModel> handleValidationException(MethodArgumentNotValidException e) {
         List<String> errors = e.getBindingResult().getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
         return ResponseEntity.badRequest()
-                .body(new GenericErrorModel(List.of(new GenericErrorModelBody(errors))));
+                .body(createErrorResponse(errors));
+    }
+
+    @ExceptionHandler(HttpException.class)
+    public ResponseEntity<GenericErrorModel> handleBusinessException(HttpException e) {
+        return ResponseEntity.status(e.getStatus())
+                .body(createErrorResponse(List.of(e.getDescription())));
+    }
+
+    private GenericErrorModel createErrorResponse(List<String> e) {
+        return new GenericErrorModel(List.of(new GenericErrorModelBody(e)));
     }
 }
 

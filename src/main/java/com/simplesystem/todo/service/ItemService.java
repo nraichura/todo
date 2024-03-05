@@ -18,7 +18,7 @@ public class ItemService {
 
     public ItemDto changeDescription(final Long itemId, final String newDescription){
         return transactionHandler.runInTransaction(() -> {
-                    Item existingItem = itemRepository.findById(itemId).orElseThrow(() -> new HttpException(HttpStatus.NOT_FOUND, String.format("Item with %s not found", itemId)));
+                    Item existingItem = itemRepository.findById(itemId).orElseThrow(() -> new HttpException(HttpStatus.NOT_FOUND, String.format("Item with id %s not found", itemId)));
                     existingItem.setDescription(newDescription);
                     return existingItem.toItemDto();
                 });

@@ -26,7 +26,7 @@ public class ItemController {
         return itemRepository.save(item.toItemEntity()).toItemDto();
     }
 
-    @PutMapping("/items/{itemId}")
+    @PatchMapping("/items/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     public ItemDto changeDescription(@RequestBody @Nonnull @Valid ChangeDescriptionRequestDto item, @PathVariable("itemId") Long itemId){
         return itemService.changeDescription(itemId, item.description());
