@@ -1,0 +1,96 @@
+package com.simplesystem.todo.controller;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.simplesystem.todo.dto.ItemDto;
+import com.simplesystem.todo.entity.Item;
+import com.simplesystem.todo.entity.ItemStatus;
+import com.simplesystem.todo.repository.ItemRepository;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
+@WebMvcTest(ItemController.class)
+public class ItemControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private ItemRepository itemRepository;
+
+    @Test
+    void addItem_ShouldAddItemSuccessfully() throws Exception {
+        // Prepare
+        Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
+        Item item = new Item(1L, "open bank account", ItemStatus.NOT_DONE, Instant.now(), dueAt, null);
+        ItemDto itemDto = item.toItemDto();
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        // Act
+        MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
+                        .content(asJsonString(new ItemDto("open bank account", dueAt)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andReturn();
+
+        // Assert
+        assertEquals(201, mvcResult.getResponse().getStatus());
+        ItemDto result = fromJsonString(mvcResult.getResponse().getContentAsString(), ItemDto.class);
+        assertEquals(itemDto, result);
+    }
+
+    @Test
+    void addItem_ShouldThrowErrorWhenDescriptionIsKeptNullOrBlank() throws Exception {
+        // Prepare
+        Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
+        Item item = new Item(1L, "", ItemStatus.NOT_DONE, Instant.now(), dueAt, null);
+        ItemDto itemDto = item.toItemDto();
+//        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        // Act
+        MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
+                        .content(asJsonString(new ItemDto("", dueAt)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andReturn();
+
+        // Assert
+        assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(mvcResult.getResponse().getErrorMessage(), "Invalid request content.");
+    }
+
+    private <T> T fromJsonString(String content, Class<T> tClass){
+        try {
+            return objectMapper.readValue(content, tClass);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String asJsonString(final Object obj) {
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

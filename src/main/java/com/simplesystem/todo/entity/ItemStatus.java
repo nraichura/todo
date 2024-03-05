@@ -1,13 +1,21 @@
 package com.simplesystem.todo.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum ItemStatus {
-        NOT_DONE("Not Done"),
-        DONE("Done"),
-        PAST_DUE("Past Due");
+    NOT_DONE("Not Done"),
+    DONE("Done"),
+    PAST_DUE("Past Due");
 
-        private final String description;
+    @JsonValue
+    private final String description;
 
-        ItemStatus(final String description) {
-            this.description = description;
-        }
+    ItemStatus(final String description) {
+        this.description = description;
     }
+
+    @Override
+    public String toString() {
+        return description;
+    }
+}
