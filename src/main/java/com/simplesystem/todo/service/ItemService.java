@@ -7,6 +7,7 @@ import com.simplesystem.todo.exception.HttpException;
 import com.simplesystem.todo.repository.ItemRepository;
 import com.simplesystem.todo.utility.TransactionHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +22,12 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final TransactionHandler transactionHandler;
 
-    public ItemDto changeDescription(final Long itemId, final String newDescription){
+    public ItemDto changeDescription(final Long itemId, final String newDescription) {
         return transactionHandler.runInTransaction(() -> {
-                    Item existingItem = getItem(itemId);
-                    existingItem.setDescription(newDescription);
-                    return existingItem.toItemDto();
-                });
+            Item existingItem = getItem(itemId);
+            existingItem.setDescription(newDescription);
+            return existingItem.toItemDto();
+        });
     }
 
     private Item getItem(Long itemId) {
@@ -34,14 +35,14 @@ public class ItemService {
     }
 
     public Item save(Item item) {
-        return itemRepository.save(item);
+            return itemRepository.save(item);
     }
 
     public ItemDto changeStatus(final Long itemId, final ItemStatus status) {
         return transactionHandler.runInTransaction(() -> {
             Item existingItem = getItem(itemId);
             existingItem.setStatus(status);
-            switch (status){
+            switch (status) {
                 case DONE -> existingItem.setMarkedDoneAt(Instant.now());
                 case NOT_DONE -> existingItem.setMarkedDoneAt(null);
                 case PAST_DUE -> throw new UnsupportedOperationException("Past Due operation is not supported at the moment");
@@ -52,7 +53,7 @@ public class ItemService {
 
     public List<ItemDto> getItems(ItemStatus status) {
         Optional<ItemStatus> statusOptional = Optional.ofNullable(status);
-        if (statusOptional.isPresent()){
+        if (statusOptional.isPresent()) {
             return itemRepository.findByStatus(statusOptional.get())
                     .stream()
                     .map(Item::toItemDto)
