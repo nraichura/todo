@@ -72,8 +72,8 @@ public class ItemController {
             @ApiResponse(responseCode = "200", description = "Successfully got todo items"),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = GenericErrorModel.class)))
     })
-    public List<ItemDto> getItems(@RequestParam(name = "statusToExclude", required = false) @Nullable ItemStatus statusToExclude){
-        return itemService.getItems(statusToExclude).stream()
+    public List<ItemDto> getItems(@RequestParam(name = "status", required = false) @Nullable ItemStatus status){
+        return itemService.getItems(status).stream()
                 .map(Item::toItemDto).toList();
     }
 

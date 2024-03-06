@@ -95,7 +95,7 @@ public class ItemApisTest {
         long itemId = newItem.getId();
 
         // Act
-        ResponseEntity<ItemDto> response = updateStatus(ItemStatus.DONE, String.valueOf(itemId));
+        ResponseEntity<ItemDto> response = updateStatus(ItemStatus.DONE, String.valueOf(itemId), ItemDto.class);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -110,20 +110,36 @@ public class ItemApisTest {
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
         // Extract the created item's ID
         long itemId = newItem.getId();
-        ResponseEntity<ItemDto> response = updateStatus(ItemStatus.DONE, String.valueOf(itemId));
+        ResponseEntity<ItemDto> response = updateStatus(ItemStatus.DONE, String.valueOf(itemId), ItemDto.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         ItemDto item = Objects.requireNonNull(response.getBody());
         assertEquals(ItemStatus.DONE, item.getStatus());
         assertNotNull(item.getMarkedDoneAt());
 
         // Act
-        ResponseEntity<ItemDto> response2 = updateStatus(ItemStatus.NOT_DONE, String.valueOf(itemId));
+        ResponseEntity<ItemDto> response2 = updateStatus(ItemStatus.NOT_DONE, String.valueOf(itemId), ItemDto.class);
 
         // Assert
         assertEquals(HttpStatus.OK, response2.getStatusCode());
         ItemDto sameModifiedItem = Objects.requireNonNull(response2.getBody());
         assertEquals(ItemStatus.NOT_DONE, sameModifiedItem.getStatus());
         assertNull(sameModifiedItem.getMarkedDoneAt());
+    }
+
+    @Test
+    public void updateStatus_ShouldRespondWithBadRequest_WhenStatusUpdateToPastDue() throws UnsupportedEncodingException {
+        // Prepare - create an item
+        ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
+        List<String> expectedResponse = List.of(String.format("Changing item status for the item id '%s' to 'Past Due' is not allowed.", newItem.getId()));
+        // Extract the created item's ID
+        long itemId = newItem.getId();
+        ResponseEntity<GenericErrorModel> response = updateStatus(ItemStatus.PAST_DUE, String.valueOf(itemId), GenericErrorModel.class);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        List<String> errors = Objects.requireNonNull(response.getBody())
+                .errors().stream()
+                .flatMap(e -> e.body().stream())
+                .toList();
+        assertEquals(expectedResponse, errors);
     }
 
     @Test
@@ -150,18 +166,18 @@ public class ItemApisTest {
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
         ItemDto newItem2 = createItem("desc2", Instant.now().plus(1, ChronoUnit.HOURS));
         ItemDto newItem3 = createItem("desc3", Instant.now().plus(1, ChronoUnit.HOURS));
-        ResponseEntity<ItemDto> response = updateStatus(ItemStatus.DONE, String.valueOf(newItem.getId()));
-        ResponseEntity<ItemDto> response2 = updateStatus(ItemStatus.DONE, String.valueOf(newItem2.getId()));
+        updateStatus(ItemStatus.DONE, String.valueOf(newItem.getId()), ItemDto.class);
+        updateStatus(ItemStatus.DONE, String.valueOf(newItem2.getId()), ItemDto.class);
 
         // Act
-        String url = String.format(BASE_URL + GET_ITEMS_ENDPOINT_URL + "?statusToExclude=%s", ItemStatus.NOT_DONE);
+        String url = String.format(BASE_URL + GET_ITEMS_ENDPOINT_URL + "?status=%s", ItemStatus.NOT_DONE);
         ResponseEntity<List<ItemDto>> getAllResp = getItems(url);
 
         // Assert
         assertEquals(HttpStatus.OK, getAllResp.getStatusCode());
         List<ItemDto> items = Objects.requireNonNull(getAllResp.getBody());
-        assertEquals(2, items.size());
-        assertEquals(List.of(Objects.requireNonNull(response.getBody()), Objects.requireNonNull(response2.getBody())), items);
+        assertEquals(1, items.size());
+        assertEquals(List.of(Objects.requireNonNull(newItem3)), items);
     }
 
     @Test
@@ -210,8 +226,8 @@ public class ItemApisTest {
         return URLEncoder.encode(itemId, StandardCharsets.UTF_8.toString());
     }
 
-    private ResponseEntity<ItemDto> updateStatus(ItemStatus status, String itemId) throws UnsupportedEncodingException {
-        return template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(status)), ItemDto.class, urlEncode(itemId));
+    private <T> ResponseEntity<T> updateStatus(ItemStatus status, String itemId, Class<T> responseType) throws UnsupportedEncodingException {
+        return template.exchange(BASE_URL + STATUS_UPDATE_ENDPOINT_URL, HttpMethod.PATCH, new HttpEntity<>(new ChangeStatusRequestDto(status)), responseType, urlEncode(itemId));
     }
 
     private <T> ResponseEntity<T> updateDescription(long itemId, Class<T> responseType) throws UnsupportedEncodingException {

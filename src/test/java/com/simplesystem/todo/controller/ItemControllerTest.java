@@ -14,15 +14,18 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.sql.SQLDataException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -78,6 +81,25 @@ public class ItemControllerTest {
         // Assert
         assertEquals(400, mvcResult.getResponse().getStatus());
         assertEquals(errorModel, fromJsonString(mvcResult.getResponse().getContentAsString(), GenericErrorModel.class));
+    }
+
+    @Test
+    void addItem_ShouldThrow500ErrorWhenUnknownExceptionIsThrown() throws Exception {
+        // Prepare
+        Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
+        when(itemService.save(any(Item.class))).thenThrow(new RuntimeException("Some problem with data save"));
+
+        // Act
+        MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
+                        .content(asJsonString(new CreateItemRequestDto("abc", dueAt)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andReturn();
+
+        // Assert
+        assertEquals(500, mvcResult.getResponse().getStatus());
+        assertNotNull(mvcResult.getResponse().getContentAsString());
     }
 
     private <T> T fromJsonString(String content, Class<T> tClass){

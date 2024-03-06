@@ -1,6 +1,5 @@
 package com.simplesystem.todo.service;
 
-import com.simplesystem.todo.dto.ItemDto;
 import com.simplesystem.todo.entity.Item;
 import com.simplesystem.todo.entity.ItemStatus;
 import com.simplesystem.todo.exception.HttpException;
@@ -44,6 +43,7 @@ public class ItemService {
             switch (status) {
                 case DONE -> existingItem.setMarkedDoneAt(Instant.now());
                 case NOT_DONE -> existingItem.setMarkedDoneAt(null);
+                case PAST_DUE -> throw new HttpException(HttpStatus.BAD_REQUEST, String.format("Changing item status for the item id '%s' to 'Past Due' is not allowed.", existingItem.getId()));
             }
             return existingItem;
         });
@@ -53,7 +53,7 @@ public class ItemService {
         return transactionHandler.runInTransaction(() -> {
             Optional<ItemStatus> statusOptional = Optional.ofNullable(statusToExclude);
             if (statusOptional.isPresent()) {
-                return itemRepository.findByStatusIsNot(statusOptional.get());
+                return itemRepository.findByStatus(statusOptional.get());
             }
             return itemRepository.findAll();
         });
