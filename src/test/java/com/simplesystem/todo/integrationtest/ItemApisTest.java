@@ -1,5 +1,9 @@
 package com.simplesystem.todo.integrationtest;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.simplesystem.todo.dto.ChangeDescriptionRequestDto;
 import com.simplesystem.todo.dto.ChangeStatusRequestDto;
 import com.simplesystem.todo.dto.CreateItemRequestDto;
@@ -7,6 +11,13 @@ import com.simplesystem.todo.dto.ItemDto;
 import com.simplesystem.todo.entity.ItemStatus;
 import com.simplesystem.todo.exception.GenericErrorModel;
 import com.simplesystem.todo.repository.ItemRepository;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Objects;
 import org.awaitility.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -18,18 +29,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Objects;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ItemApisTest {

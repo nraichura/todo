@@ -5,9 +5,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.simplesystem.todo.entity.ItemStatus;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import lombok.*;
-
 import java.time.Instant;
+import lombok.*;
 
 @Getter
 @Builder

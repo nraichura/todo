@@ -36,6 +36,12 @@ public class ItemService {
         return transactionHandler.runInTransaction(() -> itemRepository.save(item));
     }
 
+    /**
+     * changes the item status of the item
+     * @param itemId The unique identifier of the item
+     * @param status Item status
+     * @return The item after the changed status
+     */
     public Item changeStatus(final Long itemId, final ItemStatus status) {
         return transactionHandler.runInTransaction(() -> {
             Item existingItem = getItem(itemId);
@@ -49,9 +55,9 @@ public class ItemService {
         });
     }
 
-    public List<Item> getItems(ItemStatus statusToExclude) {
+    public List<Item> getItems(ItemStatus status) {
         return transactionHandler.runInTransaction(() -> {
-            Optional<ItemStatus> statusOptional = Optional.ofNullable(statusToExclude);
+            Optional<ItemStatus> statusOptional = Optional.ofNullable(status);
             if (statusOptional.isPresent()) {
                 return itemRepository.findByStatus(statusOptional.get());
             }

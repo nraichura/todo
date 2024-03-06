@@ -5,9 +5,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.simplesystem.todo.entity.Item;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-
 import java.time.Instant;
+import lombok.*;
 
 @Getter
 @Builder

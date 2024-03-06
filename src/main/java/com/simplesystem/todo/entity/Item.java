@@ -2,9 +2,8 @@ package com.simplesystem.todo.entity;
 
 import com.simplesystem.todo.dto.ItemDto;
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.Instant;
+import lombok.*;
 
 @Entity
 @Table(name = "TODO_ITEM")

@@ -1,11 +1,10 @@
 package com.simplesystem.todo.utility;
 
 import com.simplesystem.todo.exception.HttpException;
+import java.util.function.Supplier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.function.Supplier;
 
 @Service
 public class TransactionHandler {

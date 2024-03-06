@@ -1,16 +1,14 @@
 package com.simplesystem.todo.exception;
 
+import static com.simplesystem.todo.exception.GenericErrorModel.GenericErrorModelBody;
+
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import java.util.List;
-
-import static com.simplesystem.todo.exception.GenericErrorModel.GenericErrorModelBody;
 
 @ControllerAdvice
 @Slf4j

@@ -26,6 +26,7 @@ following functionalities
 
 * Java 17
 * Spring Boot
+* In memory H2 database
 * Junit 5
 * Gradle
 * Docker
@@ -59,3 +60,14 @@ following functionalities
   ```
   Once the application start. You can see the swagger documentation at this
   url `http://localhost:8080/swagger-ui/index.html`.
+
+### What it would take to get it to production
+* Real life database (Postgres, MySql etc.) instead of just in memory h2 database.
+* I would handle the requirement of automatically changing the status of items that are past their due date as *Past Due*
+on the database side after the database upgrade.
+* I would use *Liquibase* or *Flyway* to version control database schema changes.
+* I would write more of unit tests.
+* May be, add features like authentication.
+* I would prefer to add some logs in the service methods and document the code.
+* In my opinion, I would prefer to rewrite this with *Kotlin* and *Http4k* instead of *Java* and *Spring Boot* just to 
+ease out development and remove some java boilerplate code and lombok completely.
