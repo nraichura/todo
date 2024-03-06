@@ -32,7 +32,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ItemApisTest {
+class ItemApisTest {
 
     @Autowired
     private TestRestTemplate template;
@@ -53,7 +53,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void updateDescription_ShouldRunSuccessfully() throws UnsupportedEncodingException {
+    void updateDescription_ShouldRunSuccessfully() throws UnsupportedEncodingException {
         // Prepare - create an item
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
 
@@ -69,7 +69,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void updateDescription_NotFoundResponse() throws UnsupportedEncodingException {
+    void updateDescription_NotFoundResponse() throws UnsupportedEncodingException {
         // Prepare
         long itemId = 12;
         List<String> expectedResponse = List.of(String.format("Item with id %s not found", itemId));
@@ -87,7 +87,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void updateStatus_ShouldRunSuccessfully() throws UnsupportedEncodingException {
+    void updateStatus_ShouldRunSuccessfully() throws UnsupportedEncodingException {
         // Prepare - create an item
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
 
@@ -105,7 +105,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void updateStatus_ShouldNullifyMarkedDoneAt_WhenStatusUpdateFromDoneToNotDone() throws UnsupportedEncodingException {
+    void updateStatus_ShouldNullifyMarkedDoneAt_WhenStatusUpdateFromDoneToNotDone() throws UnsupportedEncodingException {
         // Prepare - create an item
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
         // Extract the created item's ID
@@ -127,7 +127,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void updateStatus_ShouldRespondWithBadRequest_WhenStatusUpdateToPastDue() throws UnsupportedEncodingException {
+    void updateStatus_ShouldRespondWithBadRequest_WhenStatusUpdateToPastDue() throws UnsupportedEncodingException {
         // Prepare - create an item
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
         List<String> expectedResponse = List.of(String.format("Changing item status for the item id '%s' to 'Past Due' is not allowed.", newItem.getId()));
@@ -143,7 +143,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void getItems_ShouldRunSuccessfully(){
+    void getItems_ShouldRunSuccessfully(){
         // Prepare - create an item
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
         ItemDto newItem2 = createItem("desc2", Instant.now().plus(1, ChronoUnit.HOURS));
@@ -161,7 +161,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void getItems_ShouldReturnSpecificItems_WhenFilterCriteriaIsProvided() throws UnsupportedEncodingException {
+    void getItems_ShouldReturnSpecificItems_WhenFilterCriteriaIsProvided() throws UnsupportedEncodingException {
         // Prepare - create an item
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
         ItemDto newItem2 = createItem("desc2", Instant.now().plus(1, ChronoUnit.HOURS));
@@ -181,7 +181,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void getItem_ShouldRunSuccessfully() throws UnsupportedEncodingException {
+    void getItem_ShouldRunSuccessfully() throws UnsupportedEncodingException {
         // Prepare - create an item
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
         Long itemId = newItem.getId();
@@ -196,7 +196,7 @@ public class ItemApisTest {
     }
 
     @Test
-    public void scheduler_shouldUpdateItemStatusSuccessfully() {
+    void scheduler_shouldUpdateItemStatusSuccessfully() {
         ItemDto newItem = createItem("desc", Instant.now().plus(10, ChronoUnit.SECONDS));
         Long itemId = newItem.getId();
         await()
@@ -217,7 +217,7 @@ public class ItemApisTest {
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
         ItemDto newItem = createResponse.getBody();
         assertNotNull(newItem);
-        assertEquals(newItem.getStatus(), ItemStatus.NOT_DONE);
+        assertEquals(ItemStatus.NOT_DONE, newItem.getStatus());
         assertNull(newItem.getMarkedDoneAt());
         return newItem;
     }

@@ -18,7 +18,7 @@ class UpdatePastDueStatusSchedulerTest {
 
 
     @Test
-    public void scheduler_shouldRunAtleast2TimesIn15Seconds() {
+    void scheduler_shouldRunAtleast2TimesIn15Seconds() {
         await()
                 .atMost(new Duration(15, SECONDS))
                 .untilAsserted(() -> verify(mockScheduler, atLeast(2)).updatePastDueStatus());

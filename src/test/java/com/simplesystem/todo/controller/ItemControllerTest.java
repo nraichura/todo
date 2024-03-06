@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @WebMvcTest(ItemController.class)
-public class ItemControllerTest {
+class ItemControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
