@@ -13,14 +13,12 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class UpdatePastDueStatusSchedulerTest {
 
-    @SpyBean
-    private UpdatePastDueStatusScheduler mockScheduler;
+  @SpyBean private UpdatePastDueStatusScheduler mockScheduler;
 
-
-    @Test
-    void scheduler_shouldRunAtleast2TimesIn15Seconds() {
-        await()
-                .atMost(new Duration(15, SECONDS))
-                .untilAsserted(() -> verify(mockScheduler, atLeast(2)).updatePastDueStatus());
-    }
+  @Test
+  void scheduler_shouldRunAtleast2TimesIn15Seconds() {
+    await()
+        .atMost(new Duration(15, SECONDS))
+        .untilAsserted(() -> verify(mockScheduler, atLeast(2)).updatePastDueStatus());
+  }
 }

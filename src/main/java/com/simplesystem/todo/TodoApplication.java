@@ -11,14 +11,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class TodoApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TodoApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(TodoApplication.class, args);
+  }
 
-    @Bean
-    ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper;
-    }
+  @Bean
+  ObjectMapper objectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    return objectMapper;
+  }
 }

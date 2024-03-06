@@ -33,88 +33,98 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 @WebMvcTest(ItemController.class)
 class ItemControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private ItemService itemService;
+  @MockBean private ItemService itemService;
 
-    @Test
-    void addItem_ShouldAddItemSuccessfully() throws Exception {
-        // Prepare
-        Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
-        Item item = new Item(1L, "open bank account", ItemStatus.NOT_DONE, Instant.now(), dueAt, null);
-        ItemDto itemDto = item.toItemDto();
-        when(itemService.save(any(Item.class))).thenReturn(item);
+  @Test
+  void addItem_ShouldAddItemSuccessfully() throws Exception {
+    // Prepare
+    Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
+    Item item = new Item(1L, "open bank account", ItemStatus.NOT_DONE, Instant.now(), dueAt, null);
+    ItemDto itemDto = item.toItemDto();
+    when(itemService.save(any(Item.class))).thenReturn(item);
 
-        // Act
-        MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
-                        .content(asJsonString(new CreateItemRequestDto("open bank account", dueAt)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andReturn();
+    // Act
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                post("/api/v1/items")
+                    .content(asJsonString(new CreateItemRequestDto("open bank account", dueAt)))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andReturn();
 
-        // Assert
-        assertEquals(201, mvcResult.getResponse().getStatus());
-        ItemDto result = fromJsonString(mvcResult.getResponse().getContentAsString(), ItemDto.class);
-        assertEquals(itemDto, result);
+    // Assert
+    assertEquals(201, mvcResult.getResponse().getStatus());
+    ItemDto result = fromJsonString(mvcResult.getResponse().getContentAsString(), ItemDto.class);
+    assertEquals(itemDto, result);
+  }
+
+  @Test
+  void addItem_ShouldThrowErrorWhenDescriptionIsKeptNullOrBlank() throws Exception {
+    // Prepare
+    Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
+    GenericErrorModel errorModel =
+        new GenericErrorModel(
+            List.of(
+                new GenericErrorModel.GenericErrorModelBody(
+                    List.of("Description cannot be blank"))));
+
+    // Act
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                post("/api/v1/items")
+                    .content(asJsonString(new CreateItemRequestDto("", dueAt)))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andReturn();
+
+    // Assert
+    assertEquals(400, mvcResult.getResponse().getStatus());
+    assertEquals(
+        errorModel,
+        fromJsonString(mvcResult.getResponse().getContentAsString(), GenericErrorModel.class));
+  }
+
+  @Test
+  void addItem_ShouldThrow500ErrorWhenUnknownExceptionIsThrown() throws Exception {
+    // Prepare
+    Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
+    when(itemService.save(any(Item.class)))
+        .thenThrow(new RuntimeException("Some problem with data save"));
+
+    // Act
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                post("/api/v1/items")
+                    .content(asJsonString(new CreateItemRequestDto("abc", dueAt)))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andReturn();
+
+    // Assert
+    assertEquals(500, mvcResult.getResponse().getStatus());
+    assertNotNull(mvcResult.getResponse().getContentAsString());
+  }
+
+  private <T> T fromJsonString(String content, Class<T> tClass) {
+    try {
+      return objectMapper.readValue(content, tClass);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    @Test
-    void addItem_ShouldThrowErrorWhenDescriptionIsKeptNullOrBlank() throws Exception {
-        // Prepare
-        Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
-        GenericErrorModel errorModel = new GenericErrorModel(List.of(new GenericErrorModel.GenericErrorModelBody(List.of("Description cannot be blank"))));
-
-        // Act
-        MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
-                        .content(asJsonString(new CreateItemRequestDto("", dueAt)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andReturn();
-
-        // Assert
-        assertEquals(400, mvcResult.getResponse().getStatus());
-        assertEquals(errorModel, fromJsonString(mvcResult.getResponse().getContentAsString(), GenericErrorModel.class));
+  private String asJsonString(final Object obj) {
+    try {
+      return objectMapper.writeValueAsString(obj);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-
-    @Test
-    void addItem_ShouldThrow500ErrorWhenUnknownExceptionIsThrown() throws Exception {
-        // Prepare
-        Instant dueAt = Instant.now().plus(1, ChronoUnit.MINUTES);
-        when(itemService.save(any(Item.class))).thenThrow(new RuntimeException("Some problem with data save"));
-
-        // Act
-        MvcResult mvcResult = this.mockMvc.perform(post("/api/v1/items")
-                        .content(asJsonString(new CreateItemRequestDto("abc", dueAt)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andReturn();
-
-        // Assert
-        assertEquals(500, mvcResult.getResponse().getStatus());
-        assertNotNull(mvcResult.getResponse().getContentAsString());
-    }
-
-    private <T> T fromJsonString(String content, Class<T> tClass){
-        try {
-            return objectMapper.readValue(content, tClass);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String asJsonString(final Object obj) {
-        try {
-            return objectMapper.writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+  }
 }

@@ -16,28 +16,29 @@ import static com.simplesystem.todo.exception.GenericErrorModel.GenericErrorMode
 @Slf4j
 public class CustomExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<GenericErrorModel> handleValidationException(MethodArgumentNotValidException e) {
-        List<String> errors = e.getBindingResult().getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
-        return ResponseEntity.badRequest()
-                .body(createErrorResponse(errors));
-    }
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<GenericErrorModel> handleValidationException(
+      MethodArgumentNotValidException e) {
+    List<String> errors =
+        e.getBindingResult().getFieldErrors().stream()
+            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .toList();
+    return ResponseEntity.badRequest().body(createErrorResponse(errors));
+  }
 
-    @ExceptionHandler(HttpException.class)
-    public ResponseEntity<GenericErrorModel> handleBusinessException(HttpException e) {
-        return ResponseEntity.status(e.getStatus())
-                .body(createErrorResponse(List.of(e.getDescription())));
-    }
+  @ExceptionHandler(HttpException.class)
+  public ResponseEntity<GenericErrorModel> handleBusinessException(HttpException e) {
+    return ResponseEntity.status(e.getStatus())
+        .body(createErrorResponse(List.of(e.getDescription())));
+  }
 
-    @ExceptionHandler(Throwable.class)
-    public ResponseEntity<GenericErrorModel> handleUnknownErrors(Throwable e) {
-        log.error("Unknown error occurred", e);
-        return ResponseEntity.internalServerError()
-                .body(createErrorResponse(List.of(e.getMessage())));
-    }
+  @ExceptionHandler(Throwable.class)
+  public ResponseEntity<GenericErrorModel> handleUnknownErrors(Throwable e) {
+    log.error("Unknown error occurred", e);
+    return ResponseEntity.internalServerError().body(createErrorResponse(List.of(e.getMessage())));
+  }
 
-    private GenericErrorModel createErrorResponse(List<String> e) {
-        return new GenericErrorModel(List.of(new GenericErrorModelBody(e)));
-    }
+  private GenericErrorModel createErrorResponse(List<String> e) {
+    return new GenericErrorModel(List.of(new GenericErrorModelBody(e)));
+  }
 }
-

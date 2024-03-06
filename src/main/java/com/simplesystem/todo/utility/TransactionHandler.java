@@ -9,8 +9,10 @@ import java.util.function.Supplier;
 
 @Service
 public class TransactionHandler {
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = { HttpException.class })
-    public <T> T runInTransaction(Supplier<T> supplier) {
-        return supplier.get();
-    }
+  @Transactional(
+      propagation = Propagation.REQUIRED,
+      rollbackFor = {HttpException.class})
+  public <T> T runInTransaction(Supplier<T> supplier) {
+    return supplier.get();
+  }
 }

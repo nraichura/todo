@@ -16,15 +16,17 @@ import java.time.Instant;
 @EqualsAndHashCode
 @JsonClassDescription("This represents the structure of request while creating the new todo item")
 public class CreateItemRequestDto {
-    @Nonnull
-    @NotBlank(message = "Description cannot be blank")
-    @JsonPropertyDescription("Description of the todo item")
-    private String description;
-    @Nonnull
-    @JsonPropertyDescription("Due date of the todo item representing the date after which the item will move to PAST_DUE state")
-    private Instant dueAt;
+  @Nonnull
+  @NotBlank(message = "Description cannot be blank")
+  @JsonPropertyDescription("Description of the todo item")
+  private String description;
 
-    public Item toItemEntity() {
-        return new Item(this.description, this.dueAt);
-    }
+  @Nonnull
+  @JsonPropertyDescription(
+      "Due date of the todo item representing the date after which the item will move to PAST_DUE state")
+  private Instant dueAt;
+
+  public Item toItemEntity() {
+    return new Item(this.description, this.dueAt);
+  }
 }
