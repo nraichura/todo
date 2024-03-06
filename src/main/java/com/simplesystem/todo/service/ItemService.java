@@ -44,7 +44,6 @@ public class ItemService {
             switch (status) {
                 case DONE -> existingItem.setMarkedDoneAt(Instant.now());
                 case NOT_DONE -> existingItem.setMarkedDoneAt(null);
-                case PAST_DUE -> throw new UnsupportedOperationException("Past Due operation is not supported at the moment");
             }
             return existingItem;
         });

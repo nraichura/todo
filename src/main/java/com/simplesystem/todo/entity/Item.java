@@ -13,6 +13,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
+@Getter
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,3 +9,6 @@ spring:
     defer-datasource-initialization: true
   h2:
     console.enabled: true
+updatePastDueStatus:
+  scheduler:
+    fixedDelay: 5000
