@@ -53,18 +53,6 @@ public class ItemApisTest {
     }
 
     @Test
-    public void createItem_ShouldGiveInternalServerError_WhenTheItemIsCreatedWithSameDescriptionAgain() {
-        // Prepare - create an item
-        createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
-
-        // Act
-        ResponseEntity<GenericErrorModel> response = template.postForEntity(BASE_URL + CREATE_ITEM_ENDPOINT_URL, new CreateItemRequestDto("desc", Instant.now().plus(1, ChronoUnit.HOURS)), GenericErrorModel.class);
-
-        // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    }
-
-    @Test
     public void updateDescription_ShouldRunSuccessfully() throws UnsupportedEncodingException {
         // Prepare - create an item
         ItemDto newItem = createItem("desc", Instant.now().plus(1, ChronoUnit.HOURS));
