@@ -118,7 +118,7 @@ class ItemControllerTest {
   private String asJsonString(final Object obj) {
     try {
       return objectMapper.writeValueAsString(obj);
-    } catch (Exception e) {
+    } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
   }
