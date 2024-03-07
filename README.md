@@ -64,10 +64,10 @@ following functionalities
 ### What it would take to get it to production
 * Real life database (Postgres, MySql etc.) instead of just in memory h2 database.
 * I would handle the requirement of automatically changing the status of items that are past their due date as *Past Due*
-on the database side after the database upgrade.
+on the database side after the database upgrade rather than in the application itself.
 * I would use *Liquibase* or *Flyway* to version control database schema changes.
-* I would write more of unit tests.
-* May be, add features like authentication.
-* I would prefer to add some logs in the service methods and document the code.
+* I would write more unit tests.
+* May be, add features like authentication, spring boot actuator for monitoring.
+* I would prefer to add some logs in the service methods and document the code (JavaDocs).
 * In my opinion, I would prefer to rewrite this with *Kotlin* and *Http4k* instead of *Java* and *Spring Boot* just to 
 ease out development and remove some java boilerplate code and lombok completely.
