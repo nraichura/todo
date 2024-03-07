@@ -68,6 +68,7 @@ on the database side after the database upgrade rather than in the application i
 * I would use *Liquibase* or *Flyway* to version control database schema changes.
 * I would write more unit tests.
 * May be, add features like authentication, spring boot actuator for monitoring.
+* Add package scanning abilities to detect security vulnerabilities in the third party packages.
 * I would prefer to add some logs in the service methods and document the code (JavaDocs).
 * In my opinion, I would prefer to rewrite this with *Kotlin* and *Http4k* instead of *Java* and *Spring Boot* just to 
 ease out development and remove some java boilerplate code and lombok completely.
