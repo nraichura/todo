@@ -21,4 +21,4 @@ USER todo
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /todo/lib
 COPY --from=build ${DEPENDENCY}/META-INF /todo/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /todo
-ENTRYPOINT ["java","-cp","todo:todo/lib/*","com.simplesystem.todo.TodoApplication"]
+ENTRYPOINT ["java","-cp","todo:todo/lib/*","TodoApplication"]
